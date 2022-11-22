@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class Post extends Model
 {
-    use HasFactory;
+    use HasFactory, Sluggable;
 
     //protected $fillable = ['title', 'excerpt', 'body'];
     protected $guarded = ['id'];
@@ -24,14 +25,13 @@ class Post extends Model
             return $query->whereHas('category', function($query) use ($category) {
                 $query->where('slug', $category);
             });
-
         });
 
-        $query->when($filters['author'] ?? false, fn($query, $author) => 
-        $query->whereHas('author', fn($query) => 
-        $query->where('username', $author)
+        $query->when($filters['author'] ?? false, fn($query, $author) =>
+            $query->whereHas('author', fn($query) =>
+                $query->where('username', $author)
             )
-        );
+    );    
     }
 
     public function category()
@@ -47,5 +47,14 @@ class Post extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'title'
+            ]
+            ];
     }
 }
